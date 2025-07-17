@@ -148,7 +148,7 @@ gitGraph
 
 **Title Format:**  
 `[Service] [Type]: Short Description`  
-Example: `Backend feat: Implement user authentication`
+Example: `[Backend] [Feat]: Implement user authentication`
 
 **Description Template:**
 
