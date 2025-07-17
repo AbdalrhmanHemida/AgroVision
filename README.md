@@ -165,7 +165,10 @@ project/
 # Then start apps locally:
 cd frontend && pnpm dev
 cd backend && pnpm start:dev
-cd ai-service && uvicorn app.main:app --reload
+cd ai-service && source .venv/bin/activate && uvicorn app.main:app --reload
+
+# open prisma studio (run this in the root level)
+npx prisma studio --schema=database/prisma/schema.prisma
 ```
 
 ### **Database Operations:**

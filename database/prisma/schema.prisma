@@ -1,0 +1,647 @@
+// ===========================================
+// AgroVision Pro - Database Schema
+// ===========================================
+// This schema defines the complete database structure for the agricultural intelligence platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// USER MANAGEMENT
+// ===========================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      UserRole @default(FARMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Profile information
+  profile   UserProfile?
+  
+  // User's farms
+  farms     Farm[]
+  
+  // User's video uploads and analyses
+  videos    Video[]
+  analyses  Analysis[]
+  
+  // Training sessions created by user
+  trainingSessions TrainingSession[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName    String?
+  lastName     String?
+  phone        String?
+  address      String?
+  country      String?
+  timezone     String?
+  
+  // Agricultural experience
+  experience   ExperienceLevel @default(BEGINNER)
+  specialization String?
+  farmSize     Float? // in hectares
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+enum UserRole {
+  ADMIN
+  FARMER
+  RESEARCHER
+  CONSULTANT
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// ===========================================
+// FARM MANAGEMENT
+// ===========================================
+
+model Farm {
+  id      String @id @default(cuid())
+  name    String
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Farm details
+  location    String?
+  area        Float? // in hectares
+  soilType    String?
+  climate     String?
+  irrigation  String?
+  
+  // Farm fields/plots
+  fields      Field[]
+  
+  // Videos from this farm
+  videos      Video[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("farms")
+}
+
+model Field {
+  id     String @id @default(cuid())
+  name   String
+  farmId String
+  farm   Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  // Field specifications
+  area        Float? // in hectares
+  cropType    String?
+  plantingDate DateTime?
+  
+  // Current crop status
+  cropHealth  Float? // 0-100 health score
+  lastHarvest DateTime?
+  
+  // Videos from this field
+  videos Video[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("fields")
+}
+
+// ===========================================
+// VIDEO & MEDIA MANAGEMENT
+// ===========================================
+
+model Video {
+  id       String      @id @default(cuid())
+  filename String
+  originalName String
+  
+  // File properties
+  fileSize   Int
+  duration   Float? // in seconds
+  resolution String?
+  format     String
+  
+  // Processing status
+  status     VideoStatus @default(UPLOADED)
+  
+  // Agricultural context
+  cropType   String?
+  captureDate DateTime?
+  
+  // Relationships
+  uploaderId String
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+  
+  farmId     String?
+  farm       Farm?    @relation(fields: [farmId], references: [id])
+  
+  fieldId    String?
+  field      Field?   @relation(fields: [fieldId], references: [id])
+  
+  // Analysis results
+  analyses   Analysis[]
+  
+  // Training data
+  trainingFrames TrainingFrame[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("videos")
+}
+
+enum VideoStatus {
+  UPLOADED
+  PROCESSING
+  ANALYZED
+  FAILED
+  ARCHIVED
+}
+
+// ===========================================
+// AI ANALYSIS RESULTS
+// ===========================================
+
+model Analysis {
+  id      String        @id @default(cuid())
+  videoId String
+  video   Video         @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  
+  analystId String
+  analyst   User        @relation(fields: [analystId], references: [id])
+  
+  // Analysis metadata
+  status    AnalysisStatus @default(PENDING)
+  type      AnalysisType
+  confidence Float? // 0-1 confidence score
+  
+  // Analysis results (JSON format for flexibility)
+  results   Json
+  
+  // Summary metrics
+  summary   AnalysisSummary?
+  
+  // Detected issues
+  diseases  DiseaseDetection[]
+  pests     PestDetection[]
+  deficiencies NutrientDeficiency[]
+  
+  // Counting results
+  counts    CountResult[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("analyses")
+}
+
+model AnalysisSummary {
+  id         String   @id @default(cuid())
+  analysisId String   @unique
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  // Overall health metrics
+  overallHealth    Float // 0-100 health score
+  diseaseCount     Int   @default(0)
+  pestCount        Int   @default(0)
+  deficiencyCount  Int   @default(0)
+  
+  // Economic impact
+  estimatedLoss    Float? // in percentage
+  treatmentCost    Float? // in currency
+  potentialSavings Float? // in currency
+  
+  // Recommendations
+  urgencyLevel     UrgencyLevel
+  treatmentNeeded  Boolean     @default(false)
+  
+  // Yield predictions
+  expectedYield    Float?
+  qualityGrade     QualityGrade?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("analysis_summaries")
+}
+
+enum AnalysisStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum AnalysisType {
+  DISEASE_DETECTION
+  PEST_DETECTION
+  NUTRIENT_ANALYSIS
+  COUNTING
+  QUALITY_ASSESSMENT
+  YIELD_PREDICTION
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum QualityGrade {
+  GRADE_A
+  GRADE_B
+  GRADE_C
+  REJECT
+}
+
+// ===========================================
+// DISEASE & PEST DETECTION
+// ===========================================
+
+model DiseaseDetection {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  // Disease information
+  diseaseName  String
+  severity     DiseaseSeverity
+  confidence   Float // 0-1
+  affectedArea Float // percentage
+  
+  // Location in video/image
+  boundingBox  Json? // {x, y, width, height}
+  frameNumber  Int?
+  
+  // Treatment recommendations
+  treatments   DiseasesTreatment[]
+
+  createdAt DateTime @default(now())
+
+  @@map("disease_detections")
+}
+
+model PestDetection {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  // Pest information
+  pestName     String
+  severity     PestSeverity
+  confidence   Float // 0-1
+  count        Int?
+  
+  // Location in video/image
+  boundingBox  Json? // {x, y, width, height}
+  frameNumber  Int?
+  
+  // Treatment recommendations
+  treatments   PestTreatment[]
+
+  createdAt DateTime @default(now())
+
+  @@map("pest_detections")
+}
+
+model NutrientDeficiency {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  // Nutrient information
+  nutrientType   NutrientType
+  deficiencyLevel DeficiencyLevel
+  confidence     Float // 0-1
+  affectedArea   Float // percentage
+  
+  // Symptoms
+  symptoms       String?
+  
+  // Treatment recommendations
+  treatments     NutrientTreatment[]
+
+  createdAt DateTime @default(now())
+
+  @@map("nutrient_deficiencies")
+}
+
+enum DiseaseSeverity {
+  EARLY_STAGE     // 0-25%
+  MODERATE        // 26-50%
+  SEVERE          // 51-75%
+  CRITICAL        // 76-100%
+}
+
+enum PestSeverity {
+  LOW_INFESTATION
+  MODERATE_INFESTATION
+  HIGH_INFESTATION
+  CRITICAL_INFESTATION
+}
+
+enum NutrientType {
+  NITROGEN
+  PHOSPHORUS
+  POTASSIUM
+  CALCIUM
+  MAGNESIUM
+  IRON
+  ZINC
+  MANGANESE
+  BORON
+  COPPER
+}
+
+enum DeficiencyLevel {
+  MILD
+  MODERATE
+  SEVERE
+}
+
+// ===========================================
+// COUNTING RESULTS
+// ===========================================
+
+model CountResult {
+  id         String   @id @default(cuid())
+  analysisId String
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  // Count information
+  objectType    String // fruit, vegetable, plant, etc.
+  totalCount    Int
+  confidence    Float // 0-1
+  
+  // Maturity distribution
+  unripe        Int @default(0)
+  partiallyRipe Int @default(0)
+  fullyRipe     Int @default(0)
+  overripe      Int @default(0)
+  
+  // Size distribution
+  small         Int @default(0)
+  medium        Int @default(0)
+  large         Int @default(0)
+  extraLarge    Int @default(0)
+  
+  // Quality assessment
+  qualityA      Int @default(0)
+  qualityB      Int @default(0)
+  qualityC      Int @default(0)
+  rejected      Int @default(0)
+  
+  // Yield estimation
+  estimatedWeight Float? // in kg
+  estimatedVolume Float? // in liters
+  
+  createdAt DateTime @default(now())
+
+  @@map("count_results")
+}
+
+// ===========================================
+// TREATMENT RECOMMENDATIONS
+// ===========================================
+
+model DiseasesTreatment {
+  id               String          @id @default(cuid())
+  diseaseDetectionId String
+  diseaseDetection DiseaseDetection @relation(fields: [diseaseDetectionId], references: [id], onDelete: Cascade)
+  
+  // Treatment details
+  treatmentName    String
+  treatmentType    TreatmentType
+  applicationRate  String
+  applicationMethod String
+  
+  // Timing
+  applicationTiming String
+  reapplicationDays Int?
+  
+  // Cost and effectiveness
+  estimatedCost    Float?
+  effectivenessRate Float? // 0-1
+  
+  // Instructions
+  instructions     String?
+  precautions      String?
+  
+  createdAt DateTime @default(now())
+
+  @@map("diseases_treatments")
+}
+
+model PestTreatment {
+  id            String        @id @default(cuid())
+  pestDetectionId String
+  pestDetection PestDetection @relation(fields: [pestDetectionId], references: [id], onDelete: Cascade)
+  
+  // Treatment details
+  treatmentName    String
+  treatmentType    TreatmentType
+  applicationRate  String
+  applicationMethod String
+  
+  // Timing
+  applicationTiming String
+  reapplicationDays Int?
+  
+  // Cost and effectiveness
+  estimatedCost    Float?
+  effectivenessRate Float? // 0-1
+  
+  // Instructions
+  instructions     String?
+  precautions      String?
+  
+  createdAt DateTime @default(now())
+
+  @@map("pest_treatments")
+}
+
+model NutrientTreatment {
+  id                  String            @id @default(cuid())
+  nutrientDeficiencyId String
+  nutrientDeficiency  NutrientDeficiency @relation(fields: [nutrientDeficiencyId], references: [id], onDelete: Cascade)
+  
+  // Treatment details
+  treatmentName    String
+  treatmentType    TreatmentType
+  applicationRate  String
+  applicationMethod String
+  
+  // Timing
+  applicationTiming String
+  reapplicationDays Int?
+  
+  // Cost and effectiveness
+  estimatedCost    Float?
+  effectivenessRate Float? // 0-1
+  
+  // Instructions
+  instructions     String?
+  precautions      String?
+  
+  createdAt DateTime @default(now())
+
+  @@map("nutrient_treatments")
+}
+
+enum TreatmentType {
+  CHEMICAL
+  ORGANIC
+  BIOLOGICAL
+  CULTURAL
+  MECHANICAL
+  INTEGRATED
+}
+
+// ===========================================
+// MACHINE LEARNING & TRAINING
+// ===========================================
+
+model TrainingSession {
+  id        String   @id @default(cuid())
+  name      String
+  trainerId String
+  trainer   User     @relation(fields: [trainerId], references: [id])
+  
+  // Session details
+  cropType     String
+  objectType   String // what we're training to detect/count
+  description  String?
+  
+  // Training progress
+  status       TrainingStatus @default(CREATED)
+  progress     Float         @default(0) // 0-100
+  
+  // Training data
+  frames       TrainingFrame[]
+  
+  // Model information
+  modelVersion String?
+  accuracy     Float? // 0-1
+  
+  // Training metrics
+  trainedAt    DateTime?
+  trainingTime Int? // in seconds
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("training_sessions")
+}
+
+model TrainingFrame {
+  id               String          @id @default(cuid())
+  videoId          String
+  video            Video           @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  
+  trainingSessionId String
+  trainingSession  TrainingSession @relation(fields: [trainingSessionId], references: [id], onDelete: Cascade)
+  
+  // Frame details
+  frameNumber      Int
+  timestamp        Float // in seconds
+  
+  // Annotations
+  annotations      TrainingAnnotation[]
+  
+  // Validation
+  isValidated      Boolean @default(false)
+  validatedBy      String?
+  validatedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("training_frames")
+}
+
+model TrainingAnnotation {
+  id             String        @id @default(cuid())
+  frameId        String
+  frame          TrainingFrame @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  
+  // Annotation details
+  objectType     String
+  label          String
+  boundingBox    Json // {x, y, width, height}
+  
+  // Object properties
+  maturity       String?
+  size           String?
+  quality        String?
+  health         String?
+  
+  // Annotation metadata
+  confidence     Float? // if from AI assistance
+  annotatedBy    String // user who created annotation
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("training_annotations")
+}
+
+enum TrainingStatus {
+  CREATED
+  ANNOTATION_IN_PROGRESS
+  READY_FOR_TRAINING
+  TRAINING_IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+// ===========================================
+// SYSTEM CONFIGURATION
+// ===========================================
+
+model SystemSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  
+  description String?
+  category    SettingCategory @default(GENERAL)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+enum SettingCategory {
+  GENERAL
+  AI_MODEL
+  ANALYSIS
+  NOTIFICATION
+  SECURITY
+  PERFORMANCE
+} 
