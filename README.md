@@ -254,6 +254,9 @@ chmod +x scripts/local-dev.sh
 cd frontend && pnpm install && pnpm dev
 cd backend && pnpm install && pnpm start:dev
 cd ai-service && pip install -r requirements.txt && uvicorn app.main:app --reload
+
+# run Prisma Studio
+npx prisma studio --schema=database/prisma/schema.prisma
 ```
 
 #### **3. Verify Installation**
@@ -265,3 +268,4 @@ Visit these URLs to confirm everything is working:
 - AI Service: <http://localhost:8000>
 - Database UI: <http://localhost:5050>
 - Redis UI: <http://localhost:8081>
+- Prisma Studio: <http://localhost:5555>
