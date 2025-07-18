@@ -1,0 +1,29 @@
+FROM node:23-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files from the frontend directory
+COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN pnpm install
+
+# Copy source code from the frontend directory
+COPY frontend/ ./
+
+# Create prisma directory and copy the schema file
+RUN mkdir -p prisma
+COPY database/prisma/schema.prisma ./prisma/
+
+# Generate Prisma client
+RUN pnpm prisma generate
+
+# Expose port
+EXPOSE 3000
+
+# Default command (can be overridden in docker-compose)
+CMD ["pnpm", "dev"] 
