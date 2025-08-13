@@ -1,0 +1,134 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: agrovision_dev
+      POSTGRES_USER: agrovision
+      POSTGRES_PASSWORD: "0106800"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - agrovision-network
+    restart: unless-stopped
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - agrovision-network
+    restart: unless-stopped
+
+  # Spring Boot Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/agrovision_dev
+      SPRING_DATASOURCE_USERNAME: agrovision
+      SPRING_DATASOURCE_PASSWORD: 0106800
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      AI_SERVICE_URL: http://ai-service:8000
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - agrovision-network
+    restart: unless-stopped
+    # Command is defined in Dockerfile.dev
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+      VITE_API_URL: http://localhost:8080
+      VITE_AI_SERVICE_URL: http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+    depends_on:
+      - backend
+    networks:
+      - agrovision-network
+    restart: unless-stopped
+    # Command is defined in Dockerfile.dev
+
+  # Python AI Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: development
+      POSTGRES_SERVER: postgres
+      POSTGRES_USER: agrovision
+      POSTGRES_PASSWORD: 0106800
+      POSTGRES_DB: agrovision_dev
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./ai-service:/app
+      - ./uploads:/app/uploads
+
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - agrovision-network
+    restart: unless-stopped
+    # Command is defined in Dockerfile.dev
+
+  # Development Tools
+  pgadmin:
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@agrovision.com
+      PGADMIN_DEFAULT_PASSWORD: 0106800
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - agrovision-network
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - agrovision-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  agrovision-network:
+    driver: bridge 
