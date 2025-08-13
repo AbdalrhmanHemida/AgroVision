@@ -1,112 +1,63 @@
-# AgroVision Pro - Commands Reference
+# AgroVision - Commands Reference
 
-This document contains all the essential commands for developing and managing the AgroVision Pro application.
+This document contains all the essential commands for developing and managing the AgroVision agricultural intelligence platform.
 
 ## 🚀 Quick Start
 
 Choose your development approach:
 
-### Option A: Full Docker Development (Recommended for Production-like Environment)
+### Option A: Direct Development (Recommended)
 
 ```bash
-# Setup and start everything in Docker
-./scripts/docker-dev.sh
-
-# Stop all services
-docker-compose -f docker-compose.dev.yml down
+# Use the automated development launcher
+./dev.sh
 ```
 
-### Option B: Local Development (Faster Development Experience)
+### Option B: Manual Development
 
 ```bash
-# Setup local development with database in Docker
-./scripts/local-dev.sh
+# Start services manually in separate terminals:
+cd backend && ./gradlew bootRun     # Terminal 1: Spring Boot backend
+cd frontend && pnpm dev             # Terminal 2: React frontend  
+cd ai-service && source .venv/bin/activate && uvicorn app.main:app --reload # Terminal 3: FastAPI AI service
 
-# Start development servers in separate terminals:
-cd frontend && pnpm dev     # Terminal 1
-cd backend && pnpm start:dev # Terminal 2
-cd ai-service && uvicorn app.main:app --reload # Terminal 3
-```
-
-### Legacy Setup (if needed)
-
-```bash
-# Run the original automated setup (has some issues)
-./scripts/dev-setup.sh
+# Optional: Database terminal
+psql -h localhost -U postgres -d agrovision  # Password: 0106800
 ```
 
 ## 📦 Package Management (pnpm)
 
-### Frontend (Next.js)
-
-```bash
-cd frontend
-
-# Install dependencies
-pnpm install
-
-# Add new dependency
-pnpm add <package-name>
-
-# Add development dependency
-pnpm add -D <package-name>
-
-# Remove dependency
-pnpm remove <package-name>
-
-# Update dependencies
-pnpm update
-
-# Run development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-
-# Run linting
-pnpm lint
-
-# Run type checking
-pnpm type-check
-```
-
-### Backend (NestJS)
+### Backend (Spring Boot + Gradle)
 
 ```bash
 cd backend
 
-# Install dependencies
-pnpm install
+# Run application in development
+./gradlew bootRun
 
-# Add new dependency
-pnpm add <package-name>
+# Build JAR file
+./gradlew build
 
-# Start development server
-pnpm start:dev
-
-# Build application
-pnpm build
-
-# Start production server
-pnpm start:prod
+# Clean and build
+./gradlew clean build
 
 # Run tests
-pnpm test
+./gradlew test
 
-# Run e2e tests
-pnpm test:e2e
+# Run application with specific profile
+./gradlew bootRun --args='--spring.profiles.active=dev'
 
-# Generate new module
-pnpm nest generate module <module-name>
+# Generate dependency report
+./gradlew dependencies
 
-# Generate new controller
-pnpm nest generate controller <controller-name>
+# Check for dependency updates
+./gradlew dependencyUpdates
 
-# Generate new service
-pnpm nest generate service <service-name>
+# Create bootable JAR
+./gradlew bootJar
+
+# Run with JVM debugging
+./gradlew bootRun --debug-jvm
 ```
 
 ## 🐳 Docker Commands
@@ -206,40 +157,26 @@ docker-compose up -d --scale <service-name>=2
 
 ## 🗄️ Database Management
 
-### Prisma Commands
+### Spring Boot + Flyway Commands
 
 ```bash
-cd frontend
+cd backend
 
-# Initialize Prisma
-pnpm prisma init
+# Database migrations are automatically applied on startup
+# Migration files location: src/main/resources/db/migration/
 
-# Generate Prisma client
-pnpm prisma generate
+# Create new migration file (manual)
+# Format: V{version}__{description}.sql
+# Example: V001__Create_users_table.sql
 
-# Push schema to database
-pnpm prisma db push
+# Force migration on startup (development only)
+./gradlew bootRun --args='--spring.flyway.clean-disabled=false'
 
-# Pull schema from database
-pnpm prisma db pull
+# Check migration status via Spring Boot Actuator
+curl http://localhost:8080/actuator/flyway
 
-# Create migration
-pnpm prisma migrate dev --name <migration-name>
-
-# Deploy migrations
-pnpm prisma migrate deploy
-
-# Reset database
-pnpm prisma migrate reset
-
-# Browse database
-pnpm prisma studio
-
-# Format schema file
-pnpm prisma format
-
-# Validate schema
-pnpm prisma validate
+# View database schema info
+curl http://localhost:8080/actuator/health/db
 ```
 
 ### Direct Database Access
@@ -269,32 +206,38 @@ SELECT pg_size_pretty(pg_database_size('agrovision_dev'));
 
 ## 🗄️ Database Operations
 
-### **Schema Changes & Migrations**
+### **Schema Changes & Migrations (Spring Boot + Flyway)**
 
 ```bash
-# From frontend directory (where Prisma is configured)
-cd frontend
+# 1. Create new migration file in backend/src/main/resources/db/migration/
+# Format: V{version}__{description}.sql
+# Example: V002__Add_farm_table.sql
 
-# 1. Edit database/prisma/schema.prisma
-# 2. Generate Prisma client
-pnpm run db:generate
+# 2. Write SQL DDL commands in the migration file
+# Example content:
+# CREATE TABLE farms (
+#     id BIGSERIAL PRIMARY KEY,
+#     name VARCHAR(255) NOT NULL,
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+# );
 
-# 3. Push changes to database
-pnpm run db:push
+# 3. Restart Spring Boot application to apply migrations
+cd backend
+./gradlew bootRun
 
-# 4. Open database UI
-pnpm run db:studio
+# 4. Verify migration was applied
+curl http://localhost:8080/actuator/flyway
 ```
 
 ### **Database Reset (Development Only)**
 
 ```bash
-# Reset database completely
-cd frontend
-pnpm run db:push --force-reset
+# Stop application and reset database
+docker-compose restart postgres
 
-# Seed database (if you have seeders)
-pnpm run db:seed
+# Flyway will re-apply all migrations on next startup
+cd backend
+./gradlew bootRun
 ```
 
 
@@ -353,53 +296,6 @@ docker-compose logs -f ai-service
 docker-compose restart ai-service
 ```
 
-## 🛠️ Development Workflow
-
-### Code Quality
-
-```bash
-# Frontend
-cd frontend
-pnpm lint
-pnpm type-check
-pnpm build
-
-# Backend
-cd backend
-pnpm lint
-pnpm test
-pnpm build
-
-# AI Service
-cd ai-service
-black app/
-isort app/
-flake8 app/
-pytest
-```
-
-### Testing
-
-```bash
-# Frontend tests
-cd frontend
-pnpm test
-pnpm test:watch
-pnpm test:coverage
-
-# Backend tests
-cd backend
-pnpm test
-pnpm test:watch
-pnpm test:e2e
-pnpm test:cov
-
-# AI Service tests
-cd ai-service
-pytest
-pytest --cov=app
-pytest -v
-```
 
 ## 🚨 Emergency Procedures
 
@@ -409,53 +305,44 @@ pytest -v
 # Stop everything
 docker-compose down -v
 pkill -f "pnpm dev"
-pkill -f "pnpm start:dev" 
+pkill -f "gradlew bootRun"
 pkill -f "uvicorn"
 
 # Clean everything
-rm -rf frontend/node_modules backend/node_modules node_modules
+rm -rf frontend/node_modules
 cd frontend && pnpm install
-cd backend && pnpm install
-pnpm install  # Root Prisma dependencies
+
+# Clean Gradle build
+cd backend
+./gradlew clean
+
+# Clean Python cache
+cd ai-service
+find . -type d -name __pycache__ -delete
+pip install -r requirements.txt --force-reinstall
 
 # Restart from scratch
-./scripts/local-dev.sh
-./scripts/fix-permissions.sh
+docker-compose up -d postgres redis pgadmin redis-commander
 ```
 
 ### **Service-Specific Reset**
 
 ```bash
-# Frontend only
-cd frontend && rm -rf .next node_modules && pnpm install && pnpm dev
+# Frontend only (React + Vite)
+cd frontend && rm -rf node_modules dist && pnpm install && pnpm dev
 
-# Backend only  
-cd backend && rm -rf dist node_modules && pnpm install && pnpm start:dev
+# Backend only (Spring Boot)
+cd backend && ./gradlew clean && ./gradlew bootRun
 
-# AI Service only
+# AI Service only (FastAPI)
 cd ai-service && pip install -r requirements.txt --force-reinstall && uvicorn app.main:app --reload
 
-# Database only
+# Database only (PostgreSQL + Flyway)
 docker-compose restart postgres
-cd frontend && pnpm run db:push --force-reset
+# Migrations will be re-applied automatically on next backend startup
 ```
 
 ## 🔧 Debugging & Monitoring
-
-### Health Checks
-
-```bash
-# Check service health
-curl http://localhost:3000/health  # Frontend
-curl http://localhost:3001/health  # Backend
-curl http://localhost:8000/health  # AI Service
-
-# Check database connection
-docker-compose exec postgres pg_isready -U agrovision -d agrovision_dev
-
-# Check Redis connection
-docker-compose exec redis redis-cli ping
-```
 
 ### Log Management
 
@@ -477,184 +364,3 @@ docker-compose logs --tail=50 <service-name>
 # Save logs to file
 docker-compose logs > application.log
 ```
-
-### Performance Monitoring
-
-```bash
-# Check container resource usage
-docker stats
-
-# Check specific container stats
-docker stats <container-name>
-
-# View container processes
-docker-compose top
-
-# Check disk usage
-docker system df
-
-# Clean up unused resources
-docker system prune
-```
-
-## 🔄 CI/CD & Deployment
-
-### Production Build
-
-```bash
-# Build all services for production
-docker-compose -f docker-compose.prod.yml build
-
-# Start production environment
-docker-compose -f docker-compose.prod.yml up -d
-
-# Health check in production
-curl https://your-domain.com/health
-```
-
-### Environment Management
-
-```bash
-# Copy environment template
-cp env.example .env
-
-# Edit environment variables
-nano .env
-
-# Validate environment
-docker-compose config
-
-# Load new environment
-docker-compose down && docker-compose up -d
-```
-
-## 📊 Data Management
-
-### Backup & Restore
-
-```bash
-# Full database backup
-docker-compose exec postgres pg_dumpall -U agrovision > full_backup.sql
-
-# Single database backup
-docker-compose exec postgres pg_dump -U agrovision agrovision_dev > db_backup.sql
-
-# Restore database
-docker-compose exec -T postgres psql -U agrovision -d agrovision_dev < db_backup.sql
-
-# Backup uploads directory
-tar -czf uploads_backup.tar.gz uploads/
-
-# Restore uploads
-tar -xzf uploads_backup.tar.gz
-```
-
-### Data Migration
-
-```bash
-# Create new migration
-cd frontend
-pnpm prisma migrate dev --name add_new_feature
-
-# Deploy migrations to production
-pnpm prisma migrate deploy
-
-# Reset and seed database
-pnpm prisma migrate reset
-pnpm prisma db seed
-```
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-```bash
-# Clear all containers and start fresh
-docker-compose down -v
-docker system prune -a
-docker-compose up -d --build
-
-# Fix permission issues
-sudo chown -R $USER:$USER .
-
-# Clear pnpm cache
-pnpm store prune
-
-# Clear Next.js cache
-cd frontend
-rm -rf .next
-
-# Clear NestJS build
-cd backend
-rm -rf dist
-
-# Restart Docker daemon (Linux)
-sudo systemctl restart docker
-```
-
-### Service-Specific Troubleshooting
-
-```bash
-# Frontend issues
-cd frontend
-rm -rf node_modules .next
-pnpm install
-pnpm dev
-
-# Backend issues
-cd backend
-rm -rf node_modules dist
-pnpm install
-pnpm build
-pnpm start:dev
-
-# Database connection issues
-docker-compose restart postgres
-docker-compose logs postgres
-
-# Redis issues
-docker-compose restart redis
-docker-compose exec redis redis-cli ping
-```
-
-## **Permission Errors**
-
-```bash
-# Run this whenever you get permission denied errors
-./scripts/fix-permissions.sh
-```
-
-## 📝 Useful Aliases
-
-Add these to your `.bashrc` or `.zshrc`:
-
-```bash
-# AgroVision Pro aliases
-alias agro-start='docker-compose up -d'
-alias agro-stop='docker-compose down'
-alias agro-restart='docker-compose restart'
-alias agro-logs='docker-compose logs -f'
-alias agro-build='docker-compose up -d --build'
-alias agro-clean='docker-compose down -v && docker system prune -f'
-
-# Service-specific aliases
-alias agro-frontend='docker-compose logs -f frontend'
-alias agro-backend='docker-compose logs -f backend'
-alias agro-ai='docker-compose logs -f ai-service'
-alias agro-db='docker-compose exec postgres psql -U agrovision -d agrovision_dev'
-
-# Development aliases
-alias agro-fe='cd frontend && pnpm dev'
-alias agro-be='cd backend && pnpm start:dev'
-alias agro-test='docker-compose exec backend pnpm test'
-```
-
-## 🔗 Useful URLs
-
-- **Frontend**: <http://localhost:3000>
-- **Backend API**: <http://localhost:3001>
-- **AI Service**: <http://localhost:8000>
-- **PgAdmin**: <http://localhost:5050> (<admin@agrovision.com> / 0106800)
-- **Redis Commander**: <http://localhost:8081>
-- **API Documentation**: <http://localhost:3001/api/docs>
-- **GraphQL Playground**: <http://localhost:3001/graphql>

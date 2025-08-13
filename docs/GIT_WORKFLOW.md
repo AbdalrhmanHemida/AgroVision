@@ -163,7 +163,7 @@ Brief description of changes
 ## Impact
 Affected services: [list services]
 
-## Related Issues
+## Related Issues (if it exists)
 Closes #123, Fixes #456
 
 ## Checklist
