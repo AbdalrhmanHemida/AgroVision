@@ -13,6 +13,8 @@ Use the format: `[type]/[service]/[short-description]`
 - `refactor/`: Code improvements
 - `infra/`: Infrastructure changes
 - `ci/`: CI/CD pipelines
+- `release/`: Version releases
+- `hotfix/`: Critical production fixes
 
 **Service Prefixes:**
 
@@ -31,6 +33,8 @@ Use the format: `[type]/[service]/[short-description]`
 - `chore/ai/update-dependencies`
 - `infra/docker-compose-dev-setup`
 - `ci/github-actions-pipeline`
+- `release/v1.0`
+- `hotfix/security-patch`
 
 ### Commit Message Convention (Conventional Commits)
 
@@ -80,6 +84,17 @@ infra(docker): optimize dev container sizes
 - Shared common layers between services
 ```
 
+```bash
+release(root): version 1.0 baseline
+
+- Merged initial full-stack setup from develop
+- Includes frontend, backend, AI service, and PostgreSQL integration
+- Adds dev launcher and service manager scripts
+- Establishes documentation and workflow standards
+
+Tag: v1.0.0
+```
+
 ### Branch Strategy
 
 ```mermaid
@@ -113,10 +128,14 @@ gitGraph
     commit id: "Add image processing"
     checkout develop
     merge feat/ai/core
-    branch ci/github-actions
-    commit id: "Add test workflow"
+    branch release/v1.0
+    commit id: "Prepare v1.0"
+    commit id: "Final testing"
+    checkout main
+    merge release/v1.0
+    commit id: "v1.0.0" tag: "v1.0.0"
     checkout develop
-    merge ci/github-actions
+    merge release/v1.0
 ```
 
 ### Service-Specific Commit Scopes
@@ -172,12 +191,63 @@ Closes #123, Fixes #456
 - [ ] No breaking changes
 ```
 
-### Release Strategy
+### Version Release Workflow
 
-1. `develop` - Main development branch
-2. `release/v1.0` - Release stabilization branches
-3. `main` - Production-ready code (protected)
-4. `hotfix/` - Critical production fixes
+Version releases are tracked through structured branches, tagged commits, and milestone pull requests. This ensures clarity, reproducibility, and traceability across the project lifecycle.
+
+#### Release Branching Strategy
+
+| Branch Type | Purpose | Example |
+|-------------|---------|---------|
+| `develop` | Main development branch | `develop` |
+| `release/vX.Y` | Release stabilization branches | `release/v1.0` |
+| `main` | Production-ready code (protected) | `main` |
+| `hotfix/` | Critical production fixes | `hotfix/security-patch` |
+
+#### Release Commit Convention
+
+Use a scoped commit to mark the release version (see commit examples above for detailed format):
+
+#### Tagging Releases
+
+After merging into `main`, tag the release:
+
+```bash
+git checkout main
+git pull origin main
+git tag -a v1.0.0 -m "Version 1.0 – Initial full-stack setup"
+git push origin v1.0.0
+```
+
+#### Release Pull Request Template
+
+**Title Format:**  
+`[Root] [Release]: Version X.Y – Summary of milestone`
+
+**Description Template:**
+
+```markdown
+## Summary
+Brief description of the release milestone
+
+## Highlights
+- Key features and services added
+- Infrastructure and orchestration setup
+- Documentation and workflow improvements
+
+## Impact
+- Establishes stable foundation for future development
+- Enables reproducible environments and contributor onboarding
+
+## Related Issues
+Closes #123, Fixes #456
+
+## Checklist
+- [ ] All services tested
+- [ ] Documentation complete
+- [ ] Tagged and merged into main
+- [ ] Changelog updated
+```
 
 ### Best Practices
 
@@ -208,17 +278,21 @@ git commit -m "feat(frontend/crop): add crop type selector
 git push origin feat/frontend/crop-selection
 ```
 
-This structure provides:
+This comprehensive workflow provides:
 
-1. Clear ownership of service-specific changes
-2. Professional commit history for technical reviewers
-3. Automated changelog generation potential
-4. Easy navigation through project evolution
-5. Compliance with standard open-source practices
+1. **Clear ownership** of service-specific changes
+2. **Professional commit history** for technical reviewers
+3. **Automated changelog generation** potential
+4. **Easy navigation** through project evolution
+5. **Semantic versioning** and release management
+6. **Rollback capability** via tags and hotfix branches
+7. **Compliance** with standard open-source practices
 
 Technical reviewers will immediately recognize:
 
-- Your understanding of monorepo management
-- Professional approach to version control
-- Attention to maintainable project structure
-- Commitment to collaborative development standards
+- Your understanding of **monorepo management**
+- **Professional approach** to version control
+- **Attention to maintainable** project structure
+- **Commitment to collaborative** development standards
+- **Enterprise-grade release** management practices
+
