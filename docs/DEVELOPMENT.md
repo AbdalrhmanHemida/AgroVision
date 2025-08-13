@@ -209,6 +209,51 @@ The script automatically handles:
 3. **Docker issues**: Ensure Docker and Docker Compose are running
 4. **Database connection**: Use the health check option to verify connectivity
 
+#### **Backend Gradle Wrapper Issues**
+
+If you encounter this error when running the backend:
+
+```bash
+Error: Unable to access jarfile /path/to/backend/gradle/wrapper/gradle-wrapper.jar
+```
+
+**Solution**: The `gradle-wrapper.jar` file is missing. This is automatically fixed by the development script, but you can also fix it manually:
+
+```bash
+cd backend
+curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.14.3/gradle/wrapper/gradle-wrapper.jar
+./gradlew --version  # Verify it works
+```
+
+#### **Java Version Issues**
+Ensure you have Java 21 installed:
+
+```bash
+java -version  # Should show version 21.x.x
+```
+
+#### **Port Conflicts**
+If services fail to start due to port conflicts:
+
+```bash
+# Check what's using the ports
+lsof -i :8080  # Backend
+lsof -i :5173  # Frontend  
+lsof -i :8000  # AI Service
+```
+
+#### **Database Connection Issues**
+
+If the backend can't connect to PostgreSQL:
+
+```bash
+# Check if PostgreSQL is running
+sudo systemctl status postgresql
+
+# Start if needed
+sudo systemctl start postgresql
+```
+
 ### Reset Everything
 
 ```bash
