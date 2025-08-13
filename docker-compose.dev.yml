@@ -7,10 +7,10 @@ services:
       POSTGRES_USER: agrovision
       POSTGRES_PASSWORD: "0106800"
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     networks:
       - agrovision-network
     restart: unless-stopped
@@ -26,22 +26,23 @@ services:
       - agrovision-network
     restart: unless-stopped
 
-  # NestJS Backend API
+  # Spring Boot Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "3001:3001"
+      - "8080:8080"
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://agrovision:0106800@postgres:5432/agrovision_dev
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-jwt-secret-change-in-production
+      SPRING_PROFILES_ACTIVE: development
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/agrovision_dev
+      SPRING_DATASOURCE_USERNAME: agrovision
+      SPRING_DATASOURCE_PASSWORD: 0106800
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       AI_SERVICE_URL: http://ai-service:8000
     volumes:
       - ./backend:/app
-      - /app/node_modules
       - ./uploads:/app/uploads
     depends_on:
       - postgres
@@ -49,35 +50,29 @@ services:
     networks:
       - agrovision-network
     restart: unless-stopped
-    command: pnpm run start:dev
+    # Command is defined in Dockerfile.dev
 
-  # Next.js Frontend
+  # React Frontend
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile.dev
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_AI_SERVICE_URL: http://localhost:8000
-      DATABASE_URL: postgresql://agrovision:0106800@postgres:5432/agrovision_dev
+      VITE_API_URL: http://localhost:8080
+      VITE_AI_SERVICE_URL: http://localhost:8000
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - ./database/prisma:/app/prisma
-      # Do not mount .next during dev unless you're debugging it specifically
-      # or unless you generate it locally before running the container
-      # it disable css 
-      # - /app/.next
 
     depends_on:
       - backend
     networks:
       - agrovision-network
     restart: unless-stopped
-    command: pnpm run dev
+    # Command is defined in Dockerfile.dev
 
   # Python AI Service
   ai-service:
@@ -96,14 +91,14 @@ services:
     volumes:
       - ./ai-service:/app
       - ./uploads:/app/uploads
-      - ./models:/app/models
+
     depends_on:
       - postgres
       - redis
     networks:
       - agrovision-network
     restart: unless-stopped
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Command is defined in Dockerfile.dev
 
   # Development Tools
   pgadmin:

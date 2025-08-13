@@ -7,10 +7,9 @@ services:
       POSTGRES_USER: agrovision
       POSTGRES_PASSWORD: "0106800"
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - agrovision-network
     restart: unless-stopped
@@ -26,22 +25,22 @@ services:
       - agrovision-network
     restart: unless-stopped
 
-  # NestJS Backend API
+  # Spring Boot Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
     ports:
-      - "3001:3001"
+      - "8080:8080"
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgresql://agrovision:0106800@postgres:5432/agrovision_dev
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-jwt-secret-change-in-production
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/agrovision_dev
+      SPRING_DATASOURCE_USERNAME: agrovision
+      SPRING_DATASOURCE_PASSWORD: 0106800
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       AI_SERVICE_URL: http://ai-service:8000
     volumes:
-      - ./backend:/app
-      - /app/node_modules
       - ./uploads:/app/uploads
     depends_on:
       - postgres
@@ -52,21 +51,18 @@ services:
     profiles:
       - dev
 
-  # Next.js Frontend
+  # React Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_AI_SERVICE_URL: http://localhost:8000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      NODE_ENV: production
+      VITE_API_URL: http://localhost:8080
+      VITE_AI_SERVICE_URL: http://localhost:8000
+    # No volumes needed in production (static files served by nginx)
     depends_on:
       - backend
     networks:
@@ -90,9 +86,8 @@ services:
       POSTGRES_DB: agrovision_dev
       REDIS_URL: redis://redis:6379
     volumes:
-      - ./ai-service:/app
       - ./uploads:/app/uploads
-      - ./models:/app/models
+
     depends_on:
       - postgres
       - redis
