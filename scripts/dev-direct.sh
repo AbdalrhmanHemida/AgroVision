@@ -199,8 +199,29 @@ setup_services() {
         if ./gradlew --version >/dev/null 2>&1; then
             print_status "Backend gradle wrapper is working - can use ./gradlew bootRun"
         else
-            print_warning "Gradle wrapper has issues"
-            print_info "You can still run the backend through VS Code or your direct Java command"
+            print_warning "Gradle wrapper has issues - attempting to fix..."
+            
+            # Check if gradle-wrapper.jar is missing
+            if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
+                print_info "Downloading missing gradle-wrapper.jar..."
+                if curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.14.3/gradle/wrapper/gradle-wrapper.jar >/dev/null 2>&1; then
+                    print_status "gradle-wrapper.jar downloaded successfully"
+                    
+                    # Test again
+                    if ./gradlew --version >/dev/null 2>&1; then
+                        print_status "Backend gradle wrapper is now working - can use ./gradlew bootRun"
+                    else
+                        print_warning "Gradle wrapper still has issues after fix attempt"
+                        print_info "You can still run the backend through VS Code or your direct Java command"
+                    fi
+                else
+                    print_error "Failed to download gradle-wrapper.jar"
+                    print_info "You can still run the backend through VS Code or your direct Java command"
+                fi
+            else
+                print_warning "Gradle wrapper has issues but gradle-wrapper.jar exists"
+                print_info "You can still run the backend through VS Code or your direct Java command"
+            fi
         fi
         cd ..
     else
@@ -363,6 +384,18 @@ setup_database() {
                 echo "  createdb -h localhost -U postgres agrovision"
                 echo "  or connect to PostgreSQL and run: CREATE DATABASE agrovision;"
             }
+        fi
+        
+        # Check and fix backend configuration for direct development
+        print_info "Checking backend database configuration..."
+        local backend_config="backend/src/main/resources/application.properties"
+        if grep -q "postgres:5432" "$backend_config"; then
+            print_warning "Backend configured for Docker mode - fixing for direct development..."
+            sed -i 's|spring.datasource.url=jdbc:postgresql://postgres:5432/agrovision_dev|spring.datasource.url=jdbc:postgresql://localhost:5432/agrovision|g' "$backend_config"
+            sed -i 's|spring.datasource.username=agrovision|spring.datasource.username=postgres|g' "$backend_config"
+            print_status "Backend configuration updated for direct development"
+        else
+            print_status "Backend configuration is correct for direct development"
         fi
     else
         print_error "PostgreSQL is not running. Cannot set up database."
