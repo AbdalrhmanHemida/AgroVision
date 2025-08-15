@@ -8,6 +8,7 @@
 - [Development Environment](#-development-environment)
 - [Database Architecture](#-database-architecture)
 - [Getting Started](#-getting-started)
+- [Documentation](#-documentation)
 - [API Documentation](#-api-documentation)
 - [Contributing](#-contributing)
 
@@ -210,8 +211,11 @@ AgroVision/
 
 ---
 
-### **Additional Documentation**
+## 📚 Documentation
 
-Detailed development commands and troubleshooting guides are available in:
-- [`docs/commands.md`](docs/commands.md) - Comprehensive command reference
-- [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md) - Git workflow guidelines
+### **Requirements & Specifications**
+- **[Functional Requirements](docs/requirements/FRS-AgroVision.pdf)** - Core system specifications and implementation details
+
+### **Development Guides**
+- **[Git Workflow](docs/development/GIT_WORKFLOW.md)** - Version control guidelines and best practices
+- **[Development Commands](docs/development/commands.md)** - Comprehensive command reference and troubleshooting
