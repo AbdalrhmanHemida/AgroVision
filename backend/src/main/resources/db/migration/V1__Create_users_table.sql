@@ -43,6 +43,21 @@ CREATE TABLE system_settings (
     updated_by BIGINT REFERENCES users(id),
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Audit logs for security and compliance
+CREATE TABLE audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id),
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id VARCHAR(100) NOT NULL,
+    action VARCHAR(20) NOT NULL CHECK (action IN ('CREATE', 'READ', 'UPDATE', 'DELETE')),
+    old_values JSONB,
+    new_values JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =====================================================
 -- INDEXES
 -- =====================================================
@@ -56,6 +71,13 @@ CREATE INDEX idx_users_is_active ON users(is_active);
 -- User preferences indexes
 CREATE INDEX idx_user_preferences_user_id ON user_preferences(user_id);
 CREATE INDEX idx_user_preferences_key ON user_preferences(preference_key);
+
+-- Audit logs indexes
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_entity_type ON audit_logs(entity_type);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
+
 CREATE TRIGGER update_system_settings_updated_at
     BEFORE UPDATE ON system_settings
     FOR EACH ROW
