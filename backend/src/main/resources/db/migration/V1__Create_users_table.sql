@@ -33,6 +33,16 @@ CREATE TABLE user_preferences (
     
     UNIQUE(user_id, preference_key)
 );
+
+-- System settings table for application configuration
+CREATE TABLE system_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value TEXT NOT NULL,
+    description TEXT,
+    data_type VARCHAR(20) NOT NULL CHECK (data_type IN ('STRING', 'INTEGER', 'BOOLEAN', 'JSON')),
+    updated_by BIGINT REFERENCES users(id),
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 -- =====================================================
 -- INDEXES
 -- =====================================================
@@ -46,3 +56,21 @@ CREATE INDEX idx_users_is_active ON users(is_active);
 -- User preferences indexes
 CREATE INDEX idx_user_preferences_user_id ON user_preferences(user_id);
 CREATE INDEX idx_user_preferences_key ON user_preferences(preference_key);
+CREATE TRIGGER update_system_settings_updated_at
+    BEFORE UPDATE ON system_settings
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- SEED DATA
+-- =====================================================
+
+-- Insert system settings
+INSERT INTO system_settings (key, value, description, data_type) VALUES
+('max_video_size_mb', '500', 'Maximum video file size in MB', 'INTEGER'),
+('max_processing_time_minutes', '5', 'Maximum video processing time in minutes', 'INTEGER'),
+('ai_confidence_threshold', '0.5', 'Minimum confidence score for AI results', 'STRING'),
+('email_verification_required', 'true', 'Whether email verification is required for new users', 'BOOLEAN'),
+('max_failed_login_attempts', '5', 'Maximum failed login attempts before lockout', 'INTEGER'),
+('lockout_duration_minutes', '30', 'Account lockout duration in minutes', 'INTEGER');
+
