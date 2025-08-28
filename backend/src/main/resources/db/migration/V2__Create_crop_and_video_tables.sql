@@ -51,3 +51,30 @@ CREATE INDEX idx_videos_crop_type ON videos(crop_type_code);
 CREATE INDEX idx_videos_status ON videos(status);
 CREATE INDEX idx_videos_uploaded_at ON videos(uploaded_at);
 CREATE INDEX idx_videos_location ON videos(location);
+
+-- =====================================================
+-- SEED DATA
+-- =====================================================
+
+-- Insert common crop types
+INSERT INTO crop_types (code, name, scientific_name, category, growth_cycle_days, optimal_conditions) VALUES
+('TOMATO', 'Tomato', 'Solanum lycopersicum', 'FRUIT', 120, 
+ '{"temperature_min": 18, "temperature_max": 27, "humidity": "60-70%", "soil_ph": "6.0-6.8"}'),
+('POTATO', 'Potato', 'Solanum tuberosum', 'VEGETABLE', 90,
+ '{"temperature_min": 15, "temperature_max": 20, "humidity": "80-85%", "soil_ph": "5.0-6.0"}'),
+('WHEAT', 'Wheat', 'Triticum aestivum', 'GRAIN', 180,
+ '{"temperature_min": 12, "temperature_max": 25, "humidity": "50-60%", "soil_ph": "6.0-7.0"}'),
+('CORN', 'Corn', 'Zea mays', 'GRAIN', 140,
+ '{"temperature_min": 16, "temperature_max": 35, "humidity": "50-60%", "soil_ph": "6.0-6.8"}'),
+('CUCUMBER', 'Cucumber', 'Cucumis sativus', 'VEGETABLE', 60,
+ '{"temperature_min": 18, "temperature_max": 24, "humidity": "60-70%", "soil_ph": "6.0-7.0"}'),
+('PEPPER', 'Bell Pepper', 'Capsicum annuum', 'FRUIT', 100,
+ '{"temperature_min": 21, "temperature_max": 29, "humidity": "50-70%", "soil_ph": "6.0-6.8"}'),
+('LETTUCE', 'Lettuce', 'Lactuca sativa', 'VEGETABLE', 45,
+ '{"temperature_min": 15, "temperature_max": 20, "humidity": "80-85%", "soil_ph": "6.0-7.0"}'),
+('CARROT', 'Carrot', 'Daucus carota', 'VEGETABLE', 75,
+ '{"temperature_min": 16, "temperature_max": 21, "humidity": "65-75%", "soil_ph": "6.0-6.8"}'),
+('ONION', 'Onion', 'Allium cepa', 'VEGETABLE', 120,
+ '{"temperature_min": 13, "temperature_max": 24, "humidity": "65-70%", "soil_ph": "6.0-7.0"}'),
+('CABBAGE', 'Cabbage', 'Brassica oleracea', 'VEGETABLE', 90,
+ '{"temperature_min": 15, "temperature_max": 20, "humidity": "80-90%", "soil_ph": "6.0-6.5"}');
