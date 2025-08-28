@@ -21,6 +21,18 @@ CREATE TABLE users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_login_at TIMESTAMP
 );
+
+-- User preferences table for flexible user settings
+CREATE TABLE user_preferences (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    preference_key VARCHAR(100) NOT NULL,
+    preference_value TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE(user_id, preference_key)
+);
 -- =====================================================
 -- INDEXES
 -- =====================================================
@@ -30,3 +42,7 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_email_verification_token ON users(email_verification_token);
 CREATE INDEX idx_users_organization_type ON users(organization_type);
 CREATE INDEX idx_users_is_active ON users(is_active);
+
+-- User preferences indexes
+CREATE INDEX idx_user_preferences_user_id ON user_preferences(user_id);
+CREATE INDEX idx_user_preferences_key ON user_preferences(preference_key);
