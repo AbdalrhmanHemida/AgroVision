@@ -78,6 +78,30 @@ CREATE INDEX idx_audit_logs_entity_type ON audit_logs(entity_type);
 CREATE INDEX idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
 
+-- =====================================================
+-- TRIGGERS
+-- =====================================================
+
+-- Function to automatically update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply update trigger to tables with updated_at column
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_user_preferences_updated_at
+    BEFORE UPDATE ON user_preferences
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_system_settings_updated_at
     BEFORE UPDATE ON system_settings
     FOR EACH ROW
@@ -96,3 +120,52 @@ INSERT INTO system_settings (key, value, description, data_type) VALUES
 ('max_failed_login_attempts', '5', 'Maximum failed login attempts before lockout', 'INTEGER'),
 ('lockout_duration_minutes', '30', 'Account lockout duration in minutes', 'INTEGER');
 
+-- Insert demo users for development
+INSERT INTO users (
+    email, 
+    password_hash, 
+    first_name, 
+    last_name, 
+    organization_type, 
+    is_active, 
+    is_email_verified
+) VALUES 
+(
+    'demo@agrovision.com',
+    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqyc3k9FP9UKqEj8K5iWkBW', -- password123
+    'Demo',
+    'User',
+    'FARMER',
+    true,
+    true
+),
+(
+    'researcher@agrovision.com',
+    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqyc3k9FP9UKqEj8K5iWkBW', -- password123
+    'Research',
+    'Scientist',
+    'RESEARCHER',
+    true,
+    true
+),
+(
+    'consultant@agrovision.com',
+    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqyc3k9FP9UKqEj8K5iWkBW', -- password123
+    'Agricultural',
+    'Consultant',
+    'CONSULTANT',
+    true,
+    true
+);
+
+-- Insert default user preferences for demo users
+INSERT INTO user_preferences (user_id, preference_key, preference_value) VALUES
+(1, 'treatment_preference', 'organic'),
+(1, 'notification_enabled', 'true'),
+(1, 'language', 'en'),
+(1, 'timezone', 'UTC'),
+(2, 'treatment_preference', 'conventional'),
+(2, 'notification_enabled', 'true'),
+(2, 'language', 'en'),
+(3, 'treatment_preference', 'both'),
+(3, 'notification_enabled', 'false');
