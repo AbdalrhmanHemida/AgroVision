@@ -80,3 +80,83 @@ CREATE INDEX idx_reports_report_type ON reports(report_type);
 CREATE INDEX idx_reports_created_at ON reports(created_at);
 CREATE INDEX idx_reports_expires_at ON reports(expires_at);
 
+-- =====================================================
+-- SEED DATA
+-- =====================================================
+
+-- Insert common treatments
+INSERT INTO treatments (code, name, type, active_ingredients, target_diseases, target_pests, compatible_crops, 
+                       cost_per_hectare, effectiveness_percentage, application_frequency, pre_harvest_interval_days, 
+                       organic_approved, safety_warnings, application_methods) VALUES
+
+('COPPER_FUNGICIDE', 'Copper-based Fungicide', 'FUNGICIDE', 
+ ARRAY['Copper sulfate', 'Copper hydroxide'],
+ ARRAY['EARLY_BLIGHT', 'LATE_BLIGHT', 'BACTERIAL_SPOT'], 
+ ARRAY[]::TEXT[], 
+ ARRAY['TOMATO', 'POTATO', 'PEPPER'], 
+ 45.00, 85, 'Every 7-14 days', 0, true,
+ '{"skin_contact": "Avoid skin contact", "protective_equipment": "Wear gloves and mask", "water_sources": "Keep away from water sources"}',
+ '{"spray": "Foliar spray application", "concentration": "2-3 grams per liter"}'),
+
+('NEEM_OIL', 'Neem Oil Treatment', 'ORGANIC',
+ ARRAY['Azadirachtin'],
+ ARRAY['POWDERY_MILDEW', 'EARLY_BLIGHT'], 
+ ARRAY['APHID_INFESTATION', 'WHITEFLY', 'SPIDER_MITES'], 
+ ARRAY['CUCUMBER', 'TOMATO', 'PEPPER'], 
+ 30.00, 70, 'Every 5-7 days', 0, true,
+ '{"application_timing": "Apply in early morning or evening", "temperature": "Avoid application in high temperatures"}',
+ '{"spray": "Foliar spray", "concentration": "5-10ml per liter", "surfactant": "Add mild soap as surfactant"}'),
+
+('BACILLUS_SUBTILIS', 'Bacillus subtilis Biofungicide', 'BIOLOGICAL',
+ ARRAY['Bacillus subtilis strain QST 713'],
+ ARRAY['POWDERY_MILDEW', 'EARLY_BLIGHT', 'FUSARIUM_WILT'], 
+ ARRAY[]::TEXT[], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 55.00, 75, 'Every 7-10 days', 0, true,
+ '{"storage": "Store in cool, dry place", "mixing": "Use immediately after mixing"}',
+ '{"spray": "Foliar and soil application", "soil_drench": "Root zone treatment"}'),
+
+('CROP_ROTATION', 'Crop Rotation Practice', 'CULTURAL',
+ ARRAY[]::TEXT[],
+ ARRAY['EARLY_BLIGHT', 'LATE_BLIGHT', 'FUSARIUM_WILT'], 
+ ARRAY[]::TEXT[], 
+ ARRAY['TOMATO', 'POTATO'], 
+ 0.00, 60, 'Once per season', 0, true,
+ '{"planning": "Plan rotation 2-3 years in advance", "family_rotation": "Avoid planting same plant family"}',
+ '{"rotation_sequence": "Rotate with non-solanaceous crops", "timing": "Implement at start of growing season"}'),
+
+('INSECTICIDAL_SOAP', 'Insecticidal Soap', 'ORGANIC',
+ ARRAY['Potassium salts of fatty acids'],
+ ARRAY[]::TEXT[], 
+ ARRAY['APHID_INFESTATION', 'WHITEFLY', 'SPIDER_MITES'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER', 'LETTUCE'], 
+ 25.00, 65, 'Every 3-5 days', 0, true,
+ '{"phytotoxicity": "Test on small area first", "timing": "Apply in cooler parts of day"}',
+ '{"spray": "Direct contact spray", "coverage": "Ensure complete coverage including undersides of leaves"}'),
+
+('STICKY_TRAPS', 'Yellow Sticky Traps', 'CULTURAL',
+ ARRAY[]::TEXT[],
+ ARRAY[]::TEXT[], 
+ ARRAY['WHITEFLY', 'APHID_INFESTATION'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 15.00, 50, 'Replace every 2-4 weeks', 0, true,
+ '{"placement": "Place at plant canopy level", "monitoring": "Check and replace regularly"}',
+ '{"installation": "Hang traps among plants", "density": "1 trap per 10 square meters"}'),
+
+('BENEFICIAL_INSECTS', 'Beneficial Insect Release', 'BIOLOGICAL',
+ ARRAY[]::TEXT[],
+ ARRAY[]::TEXT[], 
+ ARRAY['APHID_INFESTATION', 'WHITEFLY', 'SPIDER_MITES'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 80.00, 80, 'Once or twice per season', 0, true,
+ '{"timing": "Release when pest populations are low", "environment": "Maintain suitable habitat"}',
+ '{"release": "Release according to supplier instructions", "monitoring": "Monitor establishment and effectiveness"}'),
+
+('MULCHING', 'Organic Mulching', 'CULTURAL',
+ ARRAY[]::TEXT[],
+ ARRAY['EARLY_BLIGHT', 'LATE_BLIGHT'], 
+ ARRAY[]::TEXT[], 
+ ARRAY['TOMATO', 'POTATO', 'PEPPER', 'CUCUMBER'], 
+ 20.00, 40, 'Once per season', 0, true,
+ '{"material": "Use clean, disease-free mulch", "thickness": "Apply 5-10cm thick layer"}',
+ '{"application": "Apply around plant base", "maintenance": "Maintain throughout growing season"}')
