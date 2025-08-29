@@ -39,6 +39,22 @@ CREATE TABLE recommendations (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create reports table for generated reports
+CREATE TABLE reports (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    analysis_id UUID NOT NULL REFERENCES analyses(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    report_type VARCHAR(20) NOT NULL CHECK (report_type IN ('SUMMARY', 'DETAILED', 'COMPARATIVE')),
+    format VARCHAR(10) NOT NULL CHECK (format IN ('PDF', 'HTML', 'JSON')),
+    title VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500),
+    file_size BIGINT,
+    generation_time_ms INTEGER,
+    parameters JSONB, -- report generation parameters
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP -- for cleanup of temporary reports
+);
+
 -- =====================================================
 -- INDEXES
 -- =====================================================
@@ -56,3 +72,11 @@ CREATE INDEX idx_recommendations_treatment_code ON recommendations(treatment_cod
 CREATE INDEX idx_recommendations_urgency_level ON recommendations(urgency_level);
 CREATE INDEX idx_recommendations_priority_rank ON recommendations(priority_rank);
 CREATE INDEX idx_recommendations_roi ON recommendations(roi_percentage);
+
+-- Reports table indexes
+CREATE INDEX idx_reports_analysis_id ON reports(analysis_id);
+CREATE INDEX idx_reports_user_id ON reports(user_id);
+CREATE INDEX idx_reports_report_type ON reports(report_type);
+CREATE INDEX idx_reports_created_at ON reports(created_at);
+CREATE INDEX idx_reports_expires_at ON reports(expires_at);
+
