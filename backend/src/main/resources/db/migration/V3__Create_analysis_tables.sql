@@ -20,6 +20,34 @@ CREATE TABLE analyses (
     results JSONB, -- Flexible storage for different analysis types
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Create diseases reference table
+CREATE TABLE diseases (
+    code VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    scientific_name VARCHAR(200),
+    description TEXT,
+    severity_levels VARCHAR(100)[], -- ['MILD', 'MODERATE', 'SEVERE', 'CRITICAL']
+    symptoms JSONB, -- visual symptoms, affected areas
+    affected_crops VARCHAR(20)[], -- array of crop_type codes
+    spread_rate VARCHAR(20) CHECK (spread_rate IN ('SLOW', 'MODERATE', 'FAST')),
+    economic_impact VARCHAR(20) CHECK (economic_impact IN ('LOW', 'MODERATE', 'HIGH', 'SEVERE')),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create disease detections table for specific disease findings
+CREATE TABLE disease_detections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    analysis_id UUID NOT NULL REFERENCES analyses(id) ON DELETE CASCADE,
+    disease_code VARCHAR(50) NOT NULL REFERENCES diseases(code),
+    confidence_score DECIMAL(5,4) NOT NULL CHECK (confidence_score >= 0 AND confidence_score <= 1),
+    severity_level VARCHAR(20) NOT NULL CHECK (severity_level IN ('MILD', 'MODERATE', 'SEVERE', 'CRITICAL')),
+    affected_area_percentage DECIMAL(5,2) CHECK (affected_area_percentage >= 0 AND affected_area_percentage <= 100),
+    bounding_boxes JSONB, -- coordinates of detected areas
+    frame_timestamps INTEGER[], -- seconds in video where detected
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create crop counts table for counting analysis results
 CREATE TABLE crop_counts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,6 +87,18 @@ CREATE INDEX idx_analyses_analysis_type ON analyses(analysis_type);
 CREATE INDEX idx_analyses_status ON analyses(status);
 CREATE INDEX idx_analyses_completed_at ON analyses(completed_at);
 CREATE INDEX idx_analyses_confidence_score ON analyses(confidence_score);
+
+-- Diseases table indexes
+CREATE INDEX idx_diseases_name ON diseases(name);
+CREATE INDEX idx_diseases_affected_crops ON diseases USING GIN(affected_crops);
+CREATE INDEX idx_diseases_spread_rate ON diseases(spread_rate);
+CREATE INDEX idx_diseases_economic_impact ON diseases(economic_impact);
+
+-- Disease detections indexes
+CREATE INDEX idx_disease_detections_analysis_id ON disease_detections(analysis_id);
+CREATE INDEX idx_disease_detections_disease_code ON disease_detections(disease_code);
+CREATE INDEX idx_disease_detections_confidence_score ON disease_detections(confidence_score);
+CREATE INDEX idx_disease_detections_severity_level ON disease_detections(severity_level);
 
 -- Crop counts indexes
 CREATE INDEX idx_crop_counts_analysis_id ON crop_counts(analysis_id);
