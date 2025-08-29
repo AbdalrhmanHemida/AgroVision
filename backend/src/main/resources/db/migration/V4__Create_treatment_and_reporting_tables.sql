@@ -22,6 +22,23 @@ CREATE TABLE treatments (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create recommendations table for treatment suggestions
+CREATE TABLE recommendations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    analysis_id UUID NOT NULL REFERENCES analyses(id) ON DELETE CASCADE,
+    treatment_code VARCHAR(50) NOT NULL REFERENCES treatments(code),
+    urgency_level VARCHAR(20) NOT NULL 
+        CHECK (urgency_level IN ('IMMEDIATE', 'URGENT', 'MODERATE', 'MONITOR')),
+    priority_rank INTEGER NOT NULL CHECK (priority_rank >= 1),
+    estimated_cost DECIMAL(10,2),
+    potential_savings DECIMAL(10,2),
+    roi_percentage DECIMAL(5,2), -- Return on Investment
+    application_timing VARCHAR(200),
+    application_notes TEXT,
+    confidence_score DECIMAL(5,4) CHECK (confidence_score >= 0 AND confidence_score <= 1),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =====================================================
 -- INDEXES
 -- =====================================================
@@ -33,3 +50,9 @@ CREATE INDEX idx_treatments_compatible_crops ON treatments USING GIN(compatible_
 CREATE INDEX idx_treatments_organic_approved ON treatments(organic_approved);
 CREATE INDEX idx_treatments_cost ON treatments(cost_per_hectare);
 
+-- Recommendations table indexes
+CREATE INDEX idx_recommendations_analysis_id ON recommendations(analysis_id);
+CREATE INDEX idx_recommendations_treatment_code ON recommendations(treatment_code);
+CREATE INDEX idx_recommendations_urgency_level ON recommendations(urgency_level);
+CREATE INDEX idx_recommendations_priority_rank ON recommendations(priority_rank);
+CREATE INDEX idx_recommendations_roi ON recommendations(roi_percentage);
