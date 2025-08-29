@@ -110,3 +110,64 @@ CREATE INDEX idx_growth_stages_analysis_id ON growth_stages(analysis_id);
 CREATE INDEX idx_growth_stages_growth_stage ON growth_stages(growth_stage);
 CREATE INDEX idx_growth_stages_maturity_percentage ON growth_stages(maturity_percentage);
 
+-- =====================================================
+-- SEED DATA
+-- =====================================================
+
+-- Insert common crop diseases
+INSERT INTO diseases (code, name, scientific_name, description, severity_levels, affected_crops, spread_rate, economic_impact, symptoms) VALUES
+('EARLY_BLIGHT', 'Early Blight', 'Alternaria solani', 
+ 'Fungal disease causing dark spots with concentric rings on leaves, stems, and fruits',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['TOMATO', 'POTATO'], 
+ 'MODERATE', 'MODERATE',
+ '{"leaf_spots": "Dark brown spots with concentric rings", "stem_lesions": "Dark cankers on stems", "fruit_spots": "Sunken dark spots on fruits"}'),
+
+('LATE_BLIGHT', 'Late Blight', 'Phytophthora infestans',
+ 'Destructive water mold causing rapid leaf death and fruit rot',
+ ARRAY['MODERATE', 'SEVERE', 'CRITICAL'], 
+ ARRAY['TOMATO', 'POTATO'], 
+ 'FAST', 'SEVERE',
+ '{"leaf_blight": "Water-soaked lesions turning brown", "white_mold": "White fuzzy growth on leaf undersides", "fruit_rot": "Brown rot on fruits"}'),
+
+('POWDERY_MILDEW', 'Powdery Mildew', 'Various species',
+ 'Fungal disease creating white powdery coating on plant surfaces',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['CUCUMBER', 'TOMATO', 'PEPPER'], 
+ 'MODERATE', 'MODERATE',
+ '{"white_powder": "White powdery coating on leaves", "leaf_yellowing": "Yellowing and curling of leaves", "stunted_growth": "Reduced plant vigor"}'),
+
+('BACTERIAL_SPOT', 'Bacterial Spot', 'Xanthomonas vesicatoria',
+ 'Bacterial disease causing small dark spots on leaves and fruits',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['TOMATO', 'PEPPER'], 
+ 'MODERATE', 'MODERATE',
+ '{"leaf_spots": "Small dark spots with yellow halos", "fruit_spots": "Raised scabby spots on fruits", "defoliation": "Premature leaf drop"}'),
+
+('FUSARIUM_WILT', 'Fusarium Wilt', 'Fusarium oxysporum',
+ 'Soil-borne fungal disease causing wilting and yellowing',
+ ARRAY['MODERATE', 'SEVERE', 'CRITICAL'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 'SLOW', 'HIGH',
+ '{"yellowing": "Lower leaves turn yellow", "wilting": "Progressive wilting", "vascular_browning": "Brown discoloration in stem"}'),
+
+('APHID_INFESTATION', 'Aphid Infestation', 'Various Aphididae',
+ 'Small soft-bodied insects that suck plant sap',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['TOMATO', 'PEPPER', 'CUCUMBER', 'LETTUCE'], 
+ 'FAST', 'MODERATE',
+ '{"clusters": "Small green/black insects in clusters", "honeydew": "Sticky honeydew on leaves", "curling": "Leaf curling and distortion"}'),
+
+('SPIDER_MITES', 'Spider Mites', 'Tetranychus urticae',
+ 'Tiny arachnids causing stippling and webbing on plants',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 'FAST', 'MODERATE',
+ '{"stippling": "Fine yellow stippling on leaves", "webbing": "Fine webbing on leaves", "bronzing": "Bronze discoloration of leaves"}'),
+
+('WHITEFLY', 'Whitefly', 'Bemisia tabaci',
+ 'Small white flying insects that feed on plant sap',
+ ARRAY['MILD', 'MODERATE', 'SEVERE'], 
+ ARRAY['TOMATO', 'CUCUMBER', 'PEPPER'], 
+ 'FAST', 'HIGH',
+ '{"white_insects": "Small white flying insects", "yellowing": "Yellowing of leaves", "sooty_mold": "Black sooty mold on honeydew"}');
