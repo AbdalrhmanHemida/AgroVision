@@ -63,19 +63,27 @@ graph TB
     AI --> DB
 ```
 
+## Database Architecture
+
+The database schema is designed in **PostgreSQL** with Flyway migrations for version control.  
+You can find the full diagram here: **[Database Class Diagram](docs/database_design/class-diagram-border.jpg)**
+
 ### **Service Communication**
 
 #### **Frontend ↔ Backend API**
+
 - **Technology**: RESTful HTTP APIs with JSON
 - **Endpoints**: `/api/v1/*` for all backend services
 
 #### **Backend ↔ Database**
+
 - **ORM**: Spring Data JPA with Hibernate
 - **Connection Pooling**: HikariCP (default with Spring Boot)
 - **Migrations**: Flyway for version-controlled database schema changes
 - **Connection**: `jdbc:postgresql://localhost:5432/agrovision`
 
 #### **Backend ↔ AI Service**
+
 - **Integration**: HTTP REST API calls for ML processing
 - **Data Flow**: Video upload → Backend storage → AI analysis → Results storage
 - **Async Processing**: Background job processing for long-running analyses
@@ -94,11 +102,13 @@ graph TB
 - **Git**
 
 **Optional:**
+
 - **Docker & Docker Compose** (for containerized development - currently has backend connectivity issues)
 
 ### **Quick Start**
 
 #### **1. Clone & Setup**
+
 ```bash
 git clone <repository-url>
 cd AgroVision
@@ -107,6 +117,7 @@ cd AgroVision
 #### **2. Development Options**
 
 **Option A: Direct Development (Recommended)**
+
 ```bash
 # Use the development launcher
 ./dev.sh
@@ -118,6 +129,7 @@ cd AgroVision
 > **✅ Status**: Fully working and tested. All services (Backend, Frontend, AI Service) start correctly and endpoints are accessible.
 
 **Option B: Docker Development (Currently Limited)**
+
 ```bash
 # Use the Docker development launcher
 ./dev.sh
@@ -128,6 +140,7 @@ cd AgroVision
 > **⚠️ Status**: Docker environment has backend database connectivity issues. Frontend, AI Service, PostgreSQL, Redis, and development tools (PgAdmin, Redis Commander) work correctly. Backend container fails to connect to PostgreSQL database despite correct configuration.
 
 **Option C: Manual Development**
+
 ```bash
 # Start services manually in separate terminals:
 
@@ -152,17 +165,18 @@ uvicorn app.main:app --reload
 
 | Service | URL | Purpose | Direct Dev | Docker Dev |
 |---------|-----|---------|------------|------------|
-| Frontend | http://localhost:5173 | React application | ✅ | ✅ |
-| Backend API | http://localhost:8080 | Spring Boot REST API | ✅ | ❌ |
-| AI Service | http://localhost:8000 | FastAPI ML service | ✅ | ✅ |
+| Frontend | <http://localhost:5173> | React application | ✅ | ✅ |
+| Backend API | <http://localhost:8080> | Spring Boot REST API | ✅ | ❌ |
+| AI Service | <http://localhost:8000> | FastAPI ML service | ✅ | ✅ |
 | PostgreSQL | localhost:5432 | Database | ✅ | ✅ |
 | Redis | localhost:6379 | Cache | ✅ | ✅ |
-| PgAdmin | http://localhost:5050 | DB Management | N/A | ✅ |
-| Redis Commander | http://localhost:8081 | Redis Management | N/A | ✅ |
+| PgAdmin | <http://localhost:5050> | DB Management | N/A | ✅ |
+| Redis Commander | <http://localhost:8081> | Redis Management | N/A | ✅ |
 
 ### **Backend Development**
 
 #### **Spring Boot Commands**
+
 ```bash
 cd backend
 
@@ -214,8 +228,10 @@ AgroVision/
 ## 📚 Documentation
 
 ### **Requirements & Specifications**
+
 - **[Functional Requirements](docs/requirements/FRS-AgroVision.pdf)** - Core system specifications and implementation details
 
 ### **Development Guides**
+
 - **[Git Workflow](docs/development/GIT_WORKFLOW.md)** - Version control guidelines and best practices
 - **[Development Commands](docs/development/commands.md)** - Comprehensive command reference and troubleshooting
