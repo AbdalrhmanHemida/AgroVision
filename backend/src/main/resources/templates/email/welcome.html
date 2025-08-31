@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to AgroVision Pro!</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-color: #22c55e;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .logo::after {
+            content: "🌱";
+            font-size: 28px;
+        }
+        h1 {
+            color: #1f2937;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin: 0 0 30px 0;
+            font-size: 16px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #4b5563;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+        }
+        .cta-button:hover {
+            background-color: #16a34a;
+        }
+        .features {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            color: #374151;
+            position: relative;
+            padding-left: 30px;
+        }
+        .feature-list li::before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            top: 8px;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #22c55e;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1>🎉 Welcome to AgroVision Pro!</h1>
+            <p class="subtitle">Your account is now active and ready to use</p>
+        </div>
+
+        <div class="greeting">
+            Hello <span th:text="${firstName}">User</span>,
+        </div>
+
+        <div class="message">
+            Congratulations! Your email has been successfully verified and your AgroVision Pro account is now active.
+        </div>
+
+        <div class="message">
+            You're now ready to harness the power of AI for crop health analysis. Our platform will help you detect diseases early, optimize treatments, and improve your crop yields.
+        </div>
+
+        <div style="text-align: center;">
+            <a th:href="${frontendBaseUrl + '/dashboard'}" class="cta-button">
+                Start Analyzing Your Crops
+            </a>
+        </div>
+
+        <div class="features">
+            <h3 style="margin-top: 0; color: #1f2937;">What you can do now:</h3>
+            <ul class="feature-list">
+                <li>Upload crop videos for AI analysis</li>
+                <li>Get instant disease detection results</li>
+                <li>Receive personalized treatment recommendations</li>
+                <li>Track crop health trends over time</li>
+                <li>Generate detailed analysis reports</li>
+                <li>Access our knowledge base and resources</li>
+            </ul>
+        </div>
+
+        <div class="message">
+            <strong>Getting Started Tips:</strong>
+            <ol style="color: #4b5563; margin: 15px 0; padding-left: 20px;">
+                <li>Upload your first crop video (MP4, MOV, or AVI format)</li>
+                <li>Wait for our AI to analyze the footage</li>
+                <li>Review the detailed results and recommendations</li>
+                <li>Save or export your reports for future reference</li>
+            </ol>
+        </div>
+
+        <div class="message">
+            Need help getting started? Check out our <a href="#" style="color: #22c55e;">user guide</a> or contact our support team.
+        </div>
+
+        <div class="footer">
+            <p>
+                Thank you for choosing AgroVision Pro for your crop health analysis needs!
+            </p>
+            <p>
+                Questions? Contact us at 
+                <a href="mailto:support@agrovision.com">support@agrovision.com</a>
+            </p>
+            <p>
+                © 2025 AgroVision Pro. All rights reserved.<br>
+                <a th:href="${frontendBaseUrl}">Visit our website</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
