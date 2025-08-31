@@ -1,6 +1,6 @@
-Here's a professional Git workflow tailored for your multi-service monorepo project, following industry best practices and conventional commit standards:
+# Git Workflow and Conventions
 
-### Branch Naming Convention
+## Branch Naming Convention
 
 Use the format: `[type]/[service]/[short-description]`
 
@@ -36,7 +36,7 @@ Use the format: `[type]/[service]/[short-description]`
 - `release/v1.0`
 - `hotfix/security-patch`
 
-### Commit Message Convention (Conventional Commits)
+## Commit Message Convention (Conventional Commits)
 
 ```
 [type][(scope)]: [description]
@@ -95,7 +95,7 @@ release(root): version 1.0 baseline
 Tag: v1.0.0
 ```
 
-### Branch Strategy
+## Branch Strategy
 
 ```mermaid
 gitGraph
@@ -138,7 +138,7 @@ gitGraph
     merge release/v1.0
 ```
 
-### Service-Specific Commit Scopes
+## Service-Specific Commit Scopes
 
 1. **Frontend**:
    - `feat(frontend/auth): login form`
@@ -163,7 +163,7 @@ gitGraph
    - `infra(docker): add GPU support`
    - `chore(scripts): fix permissions`
 
-### Pull Request Conventions
+## Pull Request Conventions
 
 **Title Format:**  
 `[Service] [Type]: Short Description`  
@@ -191,11 +191,11 @@ Closes #123, Fixes #456
 - [ ] No breaking changes
 ```
 
-### Version Release Workflow
+## Version Release Workflow
 
 Version releases are tracked through structured branches, tagged commits, and milestone pull requests. This ensures clarity, reproducibility, and traceability across the project lifecycle.
 
-#### Release Branching Strategy
+### Release Branching Strategy
 
 | Branch Type | Purpose | Example |
 |-------------|---------|---------|
@@ -204,11 +204,11 @@ Version releases are tracked through structured branches, tagged commits, and mi
 | `main` | Production-ready code (protected) | `main` |
 | `hotfix/` | Critical production fixes | `hotfix/security-patch` |
 
-#### Release Commit Convention
+### Release Commit Convention
 
 Use a scoped commit to mark the release version (see commit examples above for detailed format):
 
-#### Tagging Releases
+### Tagging Releases
 
 After merging into `main`, tag the release:
 
@@ -219,7 +219,7 @@ git tag -a v1.0.0 -m "Version 1.0 – Initial full-stack setup"
 git push origin v1.0.0
 ```
 
-#### Release Pull Request Template
+### Release Pull Request Template
 
 **Title Format:**  
 `[Root] [Release]: Version X.Y – Summary of milestone`
@@ -249,7 +249,7 @@ Closes #123, Fixes #456
 - [ ] Changelog updated
 ```
 
-### Best Practices
+## Best Practices
 
 1. **Atomic Commits**: Each commit should represent a single logical change
 2. **Service Isolation**: Keep changes service-specific when possible
@@ -259,40 +259,3 @@ Closes #123, Fixes #456
 6. **Branch Cleanup**: Delete merged branches
 7. **Regular Rebasing**: Rebase feature branches weekly
 8. **Commit Signature**: GPG-sign important commits
-
-### Example Workflow
-
-```bash
-# Start new feature
-git checkout -b feat/frontend/crop-selection develop
-
-# Make changes
-git add .
-git commit -m "feat(frontend/crop): add crop type selector
-
-- Created CropPicker component
-- Added thumbnail images
-- Integrated with state management"
-
-# Push and create PR
-git push origin feat/frontend/crop-selection
-```
-
-This comprehensive workflow provides:
-
-1. **Clear ownership** of service-specific changes
-2. **Professional commit history** for technical reviewers
-3. **Automated changelog generation** potential
-4. **Easy navigation** through project evolution
-5. **Semantic versioning** and release management
-6. **Rollback capability** via tags and hotfix branches
-7. **Compliance** with standard open-source practices
-
-Technical reviewers will immediately recognize:
-
-- Your understanding of **monorepo management**
-- **Professional approach** to version control
-- **Attention to maintainable** project structure
-- **Commitment to collaborative** development standards
-- **Enterprise-grade release** management practices
-
