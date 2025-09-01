@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - AgroVision Pro</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .email-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background-color: #22c55e;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .logo::after {
+            content: "🌱";
+            font-size: 28px;
+        }
+        h1 {
+            color: #1f2937;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin: 0 0 30px 0;
+            font-size: 16px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #4b5563;
+        }
+        .verify-button {
+            display: inline-block;
+            background-color: #22c55e;
+            color: white;
+            text-decoration: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+        }
+        .verify-button:hover {
+            background-color: #16a34a;
+        }
+        .alternative-link {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        .alternative-link a {
+            color: #22c55e;
+            word-break: break-all;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        .footer a {
+            color: #22c55e;
+            text-decoration: none;
+        }
+        .expiry-notice {
+            background-color: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1>Welcome to AgroVision Pro!</h1>
+            <p class="subtitle">Verify your email to start analyzing crop health with AI</p>
+        </div>
+
+        <div class="greeting">
+            Hello <span th:text="${firstName}">User</span>,
+        </div>
+
+        <div class="message">
+            Thank you for signing up for AgroVision Pro! We're excited to help you revolutionize your crop health analysis with our AI-powered platform.
+        </div>
+
+        <div class="message">
+            To get started, please verify your email address by clicking the button below:
+        </div>
+
+        <div style="text-align: center;">
+            <a th:href="${verificationUrl}" class="verify-button">
+                Verify Email Address
+            </a>
+        </div>
+
+        <div class="expiry-notice">
+            ⏰ <strong>Important:</strong> This verification link will expire in 24 hours for security reasons.
+        </div>
+
+        <div class="alternative-link">
+            <strong>Can't click the button?</strong><br>
+            Copy and paste this link into your browser:<br>
+            <a th:href="${verificationUrl}" th:text="${verificationUrl}">verification-link</a>
+        </div>
+
+        <div class="message">
+            Once verified, you'll be able to:
+            <ul style="color: #4b5563; margin: 15px 0;">
+                <li>Upload and analyze crop videos</li>
+                <li>Get AI-powered disease detection</li>
+                <li>Receive treatment recommendations</li>
+                <li>Track crop health over time</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>
+                If you didn't create an account with AgroVision Pro, please ignore this email.
+            </p>
+            <p>
+                Need help? Contact us at 
+                <a href="mailto:support@agrovision.com">support@agrovision.com</a>
+            </p>
+            <p>
+                © 2025 AgroVision Pro. All rights reserved.<br>
+                <a th:href="${frontendBaseUrl}">Visit our website</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
